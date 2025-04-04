@@ -61,12 +61,4 @@ export class QuizzComponent implements OnInit {
 
     return Object.entries(count).reduce((a, b) => (a[1] >= b[1] ? a : b))[0];
   }
-
-  resetQuiz(): void {
-    this.currentIndex = 0;
-    this.selectedAnswers = [];
-    this.finalResultText = '';
-    this.finished = false;
-    this.currentQuestion = this.questions[this.currentIndex];
-  }
 }
