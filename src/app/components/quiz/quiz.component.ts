@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import quiz_questions from '../../../assets/data/quizz_questions.json';
+import { Quiz, Question } from '../quiz/models/quiz.model';
 
 @Component({
   selector: 'app-quiz',
@@ -10,65 +11,62 @@ import quiz_questions from '../../../assets/data/quizz_questions.json';
 })
 export class QuizzComponent implements OnInit {
   title: string = '';
+  questions: Question[] = [];
+  currentQuestion!: Question;
 
-  questions: any;
-  questionSelected: any;
+  selectedAnswers: string[] = [];
+  finalResultText: string = '';
 
-  answers: string[] = [];
-  answerSelected: string = '';
-
-  questionIndex: number = 0;
-  questionMaxIndex: number = 0;
-
+  currentIndex: number = 0;
+  totalQuestions: number = 0;
   finished: boolean = false;
+
+  private quizData!: Quiz;
 
   constructor() {}
 
   ngOnInit(): void {
-    if (quiz_questions) {
-      this.finished = false;
-      this.title = quiz_questions.title;
+    this.quizData = quiz_questions as Quiz;
 
-      this.questions = quiz_questions.questions;
-      this.questionSelected = this.questions[this.questionIndex];
-
-      this.questionIndex = 0;
-      this.questionMaxIndex = this.questions.length;
-    }
+    this.title = this.quizData.title;
+    this.questions = this.quizData.questions;
+    this.totalQuestions = this.questions.length;
+    this.currentQuestion = this.questions[this.currentIndex];
+    this.finished = false;
   }
 
-  playerChoose(value: string) {
-    this.answers.push(value);
+  playerChoose(alias: string): void {
+    this.selectedAnswers.push(alias);
     this.nextStep();
   }
 
-  async nextStep() {
-    this.questionIndex += 1;
+  nextStep(): void {
+    this.currentIndex++;
 
-    if (this.questionMaxIndex > this.questionIndex) {
-      this.questionSelected = this.questions[this.questionIndex];
+    if (this.currentIndex < this.totalQuestions) {
+      this.currentQuestion = this.questions[this.currentIndex];
     } else {
-      const finalAnswer: string = await this.checkResult(this.answers);
+      const finalAlias = this.checkResult(this.selectedAnswers);
       this.finished = true;
-      this.answerSelected =
-        quiz_questions.results[
-          finalAnswer as keyof typeof quiz_questions.results
-        ];
+      this.finalResultText = this.quizData.results[finalAlias];
     }
   }
 
-  async checkResult(anwsers: string[]) {
-    const result = anwsers.reduce((previous, current, i, arr) => {
-      if (
-        arr.filter((item) => item === previous).length >
-        arr.filter((item) => item === current).length
-      ) {
-        return previous;
-      } else {
-        return current;
-      }
+  checkResult(answers: string[]): string {
+    const count: Record<string, number> = {};
+
+    answers.forEach((alias) => {
+      count[alias] = (count[alias] || 0) + 1;
     });
 
-    return result;
+    return Object.entries(count).reduce((a, b) => (a[1] >= b[1] ? a : b))[0];
+  }
+
+  resetQuiz(): void {
+    this.currentIndex = 0;
+    this.selectedAnswers = [];
+    this.finalResultText = '';
+    this.finished = false;
+    this.currentQuestion = this.questions[this.currentIndex];
   }
 }
