@@ -19,3 +19,12 @@ npm install
 ng s -o
 ```
   - Isso irá iniciar e abrir o projeto no navegador.
+
+
+## Imagens do Projeto
+
+### Pergunta
+![Perguntas do quiz](.images/1-Pergunta.png)
+
+### Resultado
+![Resultado do quiz](.images/2-Resultado.png)
